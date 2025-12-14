@@ -1,13 +1,6 @@
 # Use an official lightweight Node.js image as a parent image
 FROM node:23.6.0-slim
 
-# Needed folder to run the app
-RUN mkdir /nonexistent && \
-    chown -R nobody:nogroup /nonexistent
-
-# Create a non-root user to run the app
-USER nobody
-
 # Set the working directory in the container
 WORKDIR /usr/src/app
 
@@ -19,6 +12,13 @@ RUN npm install
 
 # Bundle the source code inside the Docker image
 COPY . .
+
+# Needed folder to run the app and set proper permissions
+RUN mkdir -p /nonexistent && \
+    chown -R nobody:nogroup /nonexistent /usr/src/app
+
+# Create a non-root user to run the app
+USER nobody
 
 
 # The application will listen on port 8080, so expose it
