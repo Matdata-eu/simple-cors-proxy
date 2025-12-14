@@ -144,7 +144,7 @@ app.use('/proxy', (req, res, next) => {
 }, createProxyMiddleware(corsProxyOptions));
 
 // Start the server with user-friendly logging
-const PORT = process.env.PORT || 8082;
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
     console.log(chalk.green(`Server is running on port ${PORT}`));
 });
