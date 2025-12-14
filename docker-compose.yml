@@ -1,7 +1,7 @@
 version: '3'
 services:
   api-proxy:
-    image: obeoneorg/simple-cors-proxy
+    image: mathiasvda/simple-cors-proxy
     container_name: api-proxy
     restart: always
     ports:

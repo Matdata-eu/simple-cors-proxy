@@ -1,25 +1,21 @@
 # 🐳 Docker Simple CORS Proxy
 
-🐳 [Docker Image](https://hub.docker.com/r/obeoneorg/simple-cors-proxy) | 🔗 [TypingMind Plugin](https://cloud.typingmind.com/plugins/p-01HMARRCP06S0B7Y6HRX1F9R0P)
+🐳 [Docker Image](https://hub.docker.com/r/mathiasvda/simple-cors-proxy)
 
-This is a simple CORS proxy server designed to work with the TypingMind plugin. It allows you to make cross-origin requests to any API without worrying about CORS restrictions.
+Based on: https://github.com/obeone/simple-cors-proxy
 
-But it's not limited to TypingMind. You can use it with any application that requires a CORS proxy!
+This is a simple CORS proxy server. It allows you to make cross-origin requests to any API without worrying about CORS restrictions.
 
 ## 🚀 Features
 
-- 🌐 Seamless integration with external APIs using the TypingMind plugin
+- 🌐 Seamless integration with external APIs
 - 🔒 Secure authentication using an API key
 - 🔗 Ability to proxy requests to any URL using the `X-Url-Destination` header or directly in the URL path
 - 🔄 Handles CORS headers to enable cross-origin requests
+- ✈️ Automatic preflight OPTIONS request handling (responds with 200 without proxying)
+- 🔐 Supports credentials with `Access-Control-Allow-Credentials: true`
 - ⚙️ Easy setup and configuration
 - 🐳 Docker image available for quick deployment
-
-## ⌨️ TypingMind Plugin
-
-The TypingMind plugin is a powerful tool that enhances the capabilities of GPT. With the TypingMind plugin, GPT can seamlessly make calls to any API without being restricted by CORS (Cross-Origin Resource Sharing) policies. This allows GPT to access external data sources and services, opening up a wide range of possibilities for integration and interaction.
-
-To use the TypingMind plugin, simply install go to the [TypingMind Plugin page](https://cloud.typingmind.com/plugins/p-01HMARRCP06S0B7Y6HRX1F9R0P) and click on Import.
 
 ## 🐳 Docker
 
@@ -28,13 +24,13 @@ You can use the Docker image to quickly run the proxy server. Here's how:
 1. Pull the Docker image:
 
 ```shell
-docker pull obeoneorg/simple-cors-proxy
+docker pull mathiasvda/simple-cors-proxy
 ```
 
 2. Run the Docker container:
 
 ```shell
-docker run -d --name simple-cors-proxy  -p 8080:8080 obeoneorg/simple-cors-proxy
+docker run -d --name simple-cors-proxy  -p 8080:8080 mathiasvda/simple-cors-proxy
 ```
 
 ## 🐳 Docker Compose
@@ -105,7 +101,7 @@ If you need to authenticate access to the proxy server, you can use the `PROXY_T
 Example :
 
 ```shell
-docker run -d --name simple-cors-proxy  -p 8080:8080 -e PROXY_TOKEN=YOUR_API_KEY obeoneorg/simple-cors-proxy
+docker run -d --name simple-cors-proxy  -p 8080:8080 -e PROXY_TOKEN=YOUR_API_KEY mathiasvda/simple-cors-proxy
 ```
 
 ```shell
@@ -123,8 +119,20 @@ In both cases, if you need to remove multiple headers, you can use a comma-separ
 So for example :
 
 ```shell
-docker run -d --name simple-cors-proxy  -p 8080:8080 -e HEADERS_TO_DELETE=X-Forwarded-For,X-Forwarded-Host obeoneorg/simple-cors-proxy
+docker run -d --name simple-cors-proxy  -p 8080:8080 -e HEADERS_TO_DELETE=X-Forwarded-For,X-Forwarded-Host mathiasvda/simple-cors-proxy
 ```
+
+#### Preflight OPTIONS Requests
+
+The proxy server automatically handles preflight OPTIONS requests for all routes. When an OPTIONS request is received, the server responds with a 200 status code and the appropriate CORS headers without proxying the request to the destination server. This includes:
+
+- `Access-Control-Allow-Origin`: The origin from the request or `*`
+- `Access-Control-Allow-Methods`: `GET,POST,PUT,PATCH,DELETE,OPTIONS`
+- `Access-Control-Allow-Headers`: `X-Requested-With,Content-Type,Accept,Origin,Last-Modified,Authorization`
+- `Access-Control-Allow-Credentials`: `true`
+- `Access-Control-Max-Age`: `86400` (24 hours)
+
+This ensures smooth cross-origin requests from browsers without unnecessary round-trips to the destination server.
 
 ## 🤝 Contributing
 

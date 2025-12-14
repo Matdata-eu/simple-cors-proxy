@@ -17,7 +17,7 @@ on:
 env:
   REGISTRY: docker.io
   IMAGE_NAME: simple-cors-proxy
-  REGISTRY_USER: obeoneorg
+  REGISTRY_USER: mathiasvda
 
 
 jobs:
