@@ -58,24 +58,24 @@ const corsProxyOptions = {
         // Check if the request has a specific destination URL
         if (req.headers['x-url-destination']) {
             const url = new URL(req.headers['x-url-destination']);
-            console.debug(chalk.cyan('Proxying request to host :'), chalk.cyanBright(url.origin));
+            console.log(chalk.cyan('Proxying request to host :'), chalk.cyanBright(url.origin));
             return url.origin;
         } else {
             // Log and throw an error if the X-Url-Destination header is not found
-            console.debug(chalk.red('No X-Url-Destination header found'));
+            console.log(chalk.red('No X-Url-Destination header found'));
             throw new Error('You need to set the X-url-destination header');
         }
     },
     pathRewrite: function (path, req) {
         // Take the full URL in req['x-url-destination'], and return only the path part
         const url = new URL(req.headers['x-url-destination']);
-        console.debug(chalk.cyan('Proxying request to path :'), chalk.cyanBright(url.pathname + url.search));
+        console.log(chalk.cyan('Proxying request to path :'), chalk.cyanBright(url.pathname + url.search));
         return url.pathname + url.search;
     },
     onProxyReq: (proxyReq, req, res) => {
         // Log the proxying of the request and the original request headers
-        console.debug(chalk.cyan('Proxying request to:'), chalk.cyanBright(req.url));
-        console.debug(chalk.cyan('Original request headers:'), req.headers);
+        console.log(chalk.cyan('Proxying request to:'), chalk.cyanBright(req.url));
+        console.log(chalk.cyan('Original request headers:'), req.headers);
 
         // Remove specific headers from the proxy request
         proxyReq.removeHeader('x-forwarded-host');
@@ -84,12 +84,12 @@ const corsProxyOptions = {
         proxyReq.removeHeader('x-url-destination');
 
         // Log the modified request headers
-        console.debug(chalk.cyan('Modified request headers:'), proxyReq.getHeaders());
+        console.log(chalk.cyan('Modified request headers:'), proxyReq.getHeaders());
     },
     onProxyRes: (proxyRes, req, res) => {
         // Log the received response status and original response headers
-        console.debug(chalk.green('Received response with status:'), chalk.greenBright(proxyRes.statusCode));
-        console.debug(chalk.green('Original response headers:'), proxyRes.headers);
+        console.log(chalk.green('Received response with status:'), chalk.greenBright(proxyRes.statusCode));
+        console.log(chalk.green('Original response headers:'), proxyRes.headers);
 
         // Adjust response headers based on the original request
         proxyRes.headers['Access-Control-Allow-Origin'] = req.headers['origin'] || '*';
@@ -97,7 +97,7 @@ const corsProxyOptions = {
         proxyRes.headers['Access-Control-Allow-Headers'] = req.headers['access-control-request-headers'] || 'Origin, Content-Type, Accept, Authorization';
 
         // Log the modified response headers
-        console.debug(chalk.green('Modified response headers:'), proxyRes.headers);
+        console.log(chalk.green('Modified response headers:'), proxyRes.headers);
     },
     onError: (err, req, res) => {
         // Log any errors encountered by the proxy
@@ -105,12 +105,13 @@ const corsProxyOptions = {
     },
 };
 
-// Handle OPTIONS requests directly with user-friendly logging
-app.options('/proxy', (req, res) => {
-    console.log(chalk.yellow('Received OPTIONS request'));
+// Handle OPTIONS requests (preflight) for all routes without proxying
+app.options('*', (req, res) => {
+    console.log(chalk.yellow('Received OPTIONS request (preflight) for:'), chalk.yellowBright(req.originalUrl));
     res.header('Access-Control-Allow-Origin', req.headers['origin'] || '*');
     res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
-    res.header('Access-Control-Allow-Headers', req.headers['access-control-request-headers'] || 'Origin, Content-Type, Accept, Authorization');
+    res.header('Access-Control-Allow-Headers', 'X-Requested-With,Content-Type,Accept,Origin,Last-Modified,Authorization');
+    res.header('Access-Control-Allow-Credentials', 'true');
     res.header('Access-Control-Max-Age', '86400'); // 24 hours
     res.sendStatus(200);
 });
@@ -143,7 +144,7 @@ app.use('/proxy', (req, res, next) => {
 }, createProxyMiddleware(corsProxyOptions));
 
 // Start the server with user-friendly logging
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 8082;
 app.listen(PORT, () => {
     console.log(chalk.green(`Server is running on port ${PORT}`));
 });
