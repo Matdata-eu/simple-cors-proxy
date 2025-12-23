@@ -92,9 +92,29 @@ const corsProxyOptions = {
         console.log(chalk.green('Original response headers:'), proxyRes.headers);
 
         // Adjust response headers based on the original request
-        proxyRes.headers['Access-Control-Allow-Origin'] = req.headers['origin'] || '*';
-        proxyRes.headers['Access-Control-Allow-Methods'] = req.headers['access-control-request-method'] || 'GET,POST,PUT,PATCH,DELETE,OPTIONS';
-        proxyRes.headers['Access-Control-Allow-Headers'] = req.headers['access-control-request-headers'] || 'Origin, Content-Type, Accept, Authorization';
+        const origin = req.headers['origin'] || '*';
+        const allowMethods = 'GET,POST,PUT,PATCH,DELETE,OPTIONS';
+        const allowHeaders = 'Accept, Authorization, Content-Length, Content-Type, Depth, DPoP, If-None-Match, Link, Location, On-Behalf-Of, Origin, Slug, WebID-TLS, X-Requested-With';
+        const exposeHeaders = 'Content-disposition,Content-Type,Access-Control-Allow-Headers,Access-Control-Allow-Methods,Access-Control-Allow-Origin,Allow,Accept-Patch,Accept-Post,Authorization,Content-Length,ETag,Last-Modified,Link,Location,Updates-Via,User,Vary,WAC-Allow,WWW-Authenticate';
+        
+        // Set headers in both uppercase and lowercase formats for maximum compatibility
+        proxyRes.headers['Access-Control-Allow-Origin'] = origin;
+        proxyRes.headers['access-control-allow-origin'] = origin;
+        
+        proxyRes.headers['Access-Control-Allow-Methods'] = allowMethods;
+        proxyRes.headers['access-control-allow-methods'] = allowMethods;
+        
+        proxyRes.headers['Access-Control-Allow-Headers'] = allowHeaders;
+        proxyRes.headers['access-control-allow-headers'] = allowHeaders;
+        
+        proxyRes.headers['Access-Control-Allow-Credentials'] = 'true';
+        proxyRes.headers['access-control-allow-credentials'] = 'true';
+        
+        proxyRes.headers['Access-Control-Max-Age'] = '86400';
+        proxyRes.headers['access-control-max-age'] = '86400';
+        
+        proxyRes.headers['Access-Control-Expose-Headers'] = exposeHeaders;
+        proxyRes.headers['access-control-expose-headers'] = exposeHeaders;
 
         // Log the modified response headers
         console.log(chalk.green('Modified response headers:'), proxyRes.headers);
@@ -108,11 +128,30 @@ const corsProxyOptions = {
 // Handle OPTIONS requests (preflight) for all routes without proxying
 app.options('*', (req, res) => {
     console.log(chalk.yellow('Received OPTIONS request (preflight) for:'), chalk.yellowBright(req.originalUrl));
-    res.header('Access-Control-Allow-Origin', req.headers['origin'] || '*');
-    res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'X-Requested-With,Content-Type,Accept,Origin,Last-Modified,Authorization');
+    const origin = req.headers['origin'] || '*';
+    const allowMethods = 'GET,POST,PUT,PATCH,DELETE,OPTIONS';
+    const allowHeaders = 'Accept, Authorization, Content-Length, Content-Type, Depth, DPoP, If-None-Match, Link, Location, On-Behalf-Of, Origin, Slug, WebID-TLS, X-Requested-With';
+    const exposeHeaders = 'Content-disposition,Content-Type,Access-Control-Allow-Headers,Access-Control-Allow-Methods,Access-Control-Allow-Origin,Allow,Accept-Patch,Accept-Post,Authorization,Content-Length,ETag,Last-Modified,Link,Location,Updates-Via,User,Vary,WAC-Allow,WWW-Authenticate';
+    
+    // Set headers in both uppercase and lowercase formats for maximum compatibility
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('access-control-allow-origin', origin);
+    
+    res.header('Access-Control-Allow-Methods', allowMethods);
+    res.header('access-control-allow-methods', allowMethods);
+    
+    res.header('Access-Control-Allow-Headers', allowHeaders);
+    res.header('access-control-allow-headers', allowHeaders);
+    
     res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Max-Age', '86400'); // 24 hours
+    res.header('access-control-allow-credentials', 'true');
+    
+    res.header('Access-Control-Max-Age', '86400');
+    res.header('access-control-max-age', '86400');
+    
+    res.header('Access-Control-Expose-Headers', exposeHeaders);
+    res.header('access-control-expose-headers', exposeHeaders);
+    
     res.sendStatus(200);
 });
 
